@@ -26,6 +26,7 @@ package com.github.thmarx.mongo.trigger;
 
 import com.mongodb.client.MongoDatabase;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,6 +44,8 @@ public class MongoTriggers implements AutoCloseable {
 
 	public MongoTriggers() {
 		this.documentTrigger = new MultiMap<>();
+		databaseTrigger = new ArrayList<>();
+		collectionTrigger = new ArrayList<>();
 	}
 	
 	public void register(final Event event, final DocumentTrigger trigger) {
