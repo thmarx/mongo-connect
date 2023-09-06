@@ -28,6 +28,8 @@ import com.mongodb.client.ChangeStreamIterable;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.FullDocument;
+import static com.mongodb.client.model.changestream.OperationType.DROP;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.bson.Document;
 
@@ -39,6 +41,10 @@ import org.bson.Document;
 public class Updater implements AutoCloseable {
 	
 	private final MongoDatabase database;
+	
+	private final MultiMap<Event, DocumentTrigger> documentTrigger;
+	private final List<DatabaseTrigger> databaseTrigger;
+	private final List<CollectionTrigger> collectionTrigger;
 	
 	private Thread watcher;
 	
@@ -57,7 +63,15 @@ public class Updater implements AutoCloseable {
 	
 	public void handle (ChangeStreamDocument<Document> document) {
 		if (isCollectionRelevant(document)) {
-			// call all triggers
+			var collection = document.getNamespace().getCollectionName();
+			var databaseName = document.getNamespace().getDatabaseName();
+			switch (document.getOperationType()) {
+				case DELETE -> documentTrigger.get(Event.DELETE).forEach((function) -> function.accept(databaseName, collection, document.getFullDocument()));
+				case INSERT -> documentTrigger.get(Event.INSERT).forEach((function) -> function.accept(databaseName, collection, document.getFullDocument()));
+				case UPDATE -> documentTrigger.get(Event.UPDATE).forEach((function) -> function.accept(databaseName, collection, document.getFullDocument()));
+				case DROP -> collectionTrigger.forEach(trigger -> trigger.accept(CollectionTrigger.Type.DROPPED, databaseName, collection));
+				case DROP_DATABASE -> databaseTrigger.forEach(trigger -> trigger.accept(DatabaseTrigger.Type.DROPPED, databaseName));
+			}
 		}
 	}
 

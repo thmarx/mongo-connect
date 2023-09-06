@@ -1,12 +1,12 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Enum.java to edit this template
  */
 package com.github.thmarx.mongo.trigger;
 
 /*-
  * #%L
- * mongo-trigger-index
+ * mongo-trigger-core
  * %%
  * Copyright (C) 2023 Marx-Software
  * %%
@@ -24,34 +24,12 @@ package com.github.thmarx.mongo.trigger;
  * #L%
  */
 
-import com.mongodb.client.MongoDatabase;
-import java.io.IOException;
-
 /**
  *
  * @author t.marx
  */
-public class MongoTrigger implements AutoCloseable {
-
-	Updater updater;
-	Thread updaterThread;
-
-	public MongoTrigger() {
-	}
-	
-
-	@Override
-	public void close() throws Exception {
-		updater.close();
-	}
-
-	public void open(MongoDatabase database) throws IOException {
-		
-		updater = new Updater(database);
-		
-		updaterThread = new Thread(() -> {
-			updater.connect();
-		});
-
-	}
+public enum Event {
+	INSERT,
+	UPDATE,
+	DELETE;
 }

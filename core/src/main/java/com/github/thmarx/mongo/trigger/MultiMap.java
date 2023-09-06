@@ -30,6 +30,7 @@ package com.github.thmarx.mongo.trigger;
  */
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -68,6 +69,9 @@ public class MultiMap<K, V> {
 	 * Multimap keine Zuordnung für den Schlüssel enthält.
 	 */
 	public Collection<V> get(Object key) {
+		if (!map.containsKey(key)) {
+			return Collections.EMPTY_LIST;
+		}
 		return map.get(key);
 	}
 
