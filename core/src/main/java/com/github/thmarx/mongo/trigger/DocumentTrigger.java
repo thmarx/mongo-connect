@@ -24,6 +24,7 @@ package com.github.thmarx.mongo.trigger;
  * #L%
  */
 
+import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import org.bson.Document;
 
 /**
@@ -32,5 +33,5 @@ import org.bson.Document;
  */
 @FunctionalInterface
 public interface DocumentTrigger {
-	void accept (String database, String colection, Document document);
+	void accept (String database, String colection, ChangeStreamDocument<Document> document);
 }

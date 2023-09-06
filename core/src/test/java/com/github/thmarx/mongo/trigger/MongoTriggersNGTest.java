@@ -85,7 +85,7 @@ public class MongoTriggersNGTest {
 		
 		insertDocument("trigger", Map.of("name", "thorsten"));
 		
-		Awaitility.await().atMost(10, TimeUnit.MINUTES).until(() -> counter.get() > 0);
+		Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> counter.get() > 0);
 		
 		Assertions.assertThat(counter).hasValue(1);
 	}

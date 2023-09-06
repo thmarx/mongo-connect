@@ -66,9 +66,9 @@ public class Updater implements AutoCloseable {
 			var collection = document.getNamespace().getCollectionName();
 			var databaseName = document.getNamespace().getDatabaseName();
 			switch (document.getOperationType()) {
-				case DELETE -> documentTrigger.get(Event.DELETE).forEach((function) -> function.accept(databaseName, collection, document.getFullDocument()));
-				case INSERT -> documentTrigger.get(Event.INSERT).forEach((function) -> function.accept(databaseName, collection, document.getFullDocument()));
-				case UPDATE -> documentTrigger.get(Event.UPDATE).forEach((function) -> function.accept(databaseName, collection, document.getFullDocument()));
+				case DELETE -> documentTrigger.get(Event.DELETE).forEach((function) -> function.accept(databaseName, collection, document));
+				case INSERT -> documentTrigger.get(Event.INSERT).forEach((function) -> function.accept(databaseName, collection, document));
+				case UPDATE -> documentTrigger.get(Event.UPDATE).forEach((function) -> function.accept(databaseName, collection, document));
 				case DROP -> collectionTrigger.forEach(trigger -> trigger.accept(CollectionTrigger.Type.DROPPED, databaseName, collection));
 				case DROP_DATABASE -> databaseTrigger.forEach(trigger -> trigger.accept(DatabaseTrigger.Type.DROPPED, databaseName));
 			}
