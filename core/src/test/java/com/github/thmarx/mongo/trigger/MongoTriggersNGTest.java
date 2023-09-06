@@ -87,8 +87,6 @@ public class MongoTriggersNGTest {
 		
 		Awaitility.await().atMost(10, TimeUnit.MINUTES).until(() -> counter.get() > 0);
 		
-		Thread.sleep(60000000);
-		
 		Assertions.assertThat(counter).hasValue(1);
 	}
 	
