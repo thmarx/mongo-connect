@@ -35,14 +35,20 @@ import java.util.List;
  */
 public class MongoTriggers implements AutoCloseable {
 
-	Updater updater;
-	Thread updaterThread;
+	ChangeStreamWatcher updater;
 	
 	MultiMap<Event, DocumentTrigger> documentTrigger;
 	List<DatabaseTrigger> databaseTrigger;
 	List<CollectionTrigger> collectionTrigger;
 
-	public MongoTriggers() {
+	final Configuration configuration;
+
+	public MongoTriggers () {
+		this(new Configuration());
+	}
+
+	public MongoTriggers(Configuration configuration) {
+		this.configuration = configuration;
 		this.documentTrigger = new MultiMap<>();
 		databaseTrigger = new ArrayList<>();
 		collectionTrigger = new ArrayList<>();
@@ -68,7 +74,7 @@ public class MongoTriggers implements AutoCloseable {
 
 	public void open(MongoDatabase database) throws IOException {
 		
-		updater = new Updater(database, documentTrigger, databaseTrigger, collectionTrigger);
+		updater = new ChangeStreamWatcher(database, this.configuration, documentTrigger, databaseTrigger, collectionTrigger);
 		
 		updater.connect();
 	}

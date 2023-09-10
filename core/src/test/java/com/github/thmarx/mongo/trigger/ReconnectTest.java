@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.assertj.core.api.Assertions;
 import org.awaitility.Awaitility;
 import org.bson.Document;
+import org.testcontainers.DockerClientFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -43,7 +44,7 @@ import org.testng.annotations.Test;
  *
  * @author t.marx
  */
-public class MongoTriggersNGTest extends AbstractContainerTest {
+public class ReconnectTest extends AbstractContainerTest {
 
 	private MongoDatabase database;
 
@@ -59,12 +60,14 @@ public class MongoTriggersNGTest extends AbstractContainerTest {
 		}
 		//database.createCollection("trigger");
 
-		mongoTriggers = new MongoTriggers();
+		mongoTriggers = new MongoTriggers(new Configuration()
+			.connectRetryDelay(TimeUnit.SECONDS.toMillis(1))
+		);
 		mongoTriggers.open(database);
 	}
 
 	@Test
-	public void testSomeMethod() throws InterruptedException {
+	public void test_reconnect() throws InterruptedException {
 		
 		final AtomicInteger counter = new AtomicInteger(0);
 		
@@ -72,17 +75,21 @@ public class MongoTriggersNGTest extends AbstractContainerTest {
 			counter.incrementAndGet();
 		});
 		
-		insertDocument("trigger", Map.of("name", "thorsten"));
-		
-		Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> counter.get() > 0);
-		
+		insertDocument(database, "trigger", Map.of("name", "thorsten"));
+		Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> counter.get() == 1);
 		Assertions.assertThat(counter).hasValue(1);
+
+		System.out.println("disconnect");
+		mongdbContainer.getDockerClient().pauseContainerCmd(mongdbContainer.getContainerId()).exec();
+
+		System.out.println("reconnect");
+		mongdbContainer.getDockerClient().unpauseContainerCmd(mongdbContainer.getContainerId()).exec();
+
+		insertDocument(database, "trigger", Map.of("name", "thorsten"));
+		Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> counter.get() == 2);
+		Assertions.assertThat(counter).hasValue(2);
 	}
 	
-	private void insertDocument(final String collectionName, final Map attributes) {
-		MongoCollection<Document> collection = database.getCollection(collectionName);
-		Document document = new Document(attributes);
-		collection.insertOne(document);
-	}
+	
 
 }
