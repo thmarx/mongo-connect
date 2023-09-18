@@ -63,6 +63,7 @@ public class ChangeStreamWatcher implements AutoCloseable {
 					retryCounter = 0;
 					log.debug("connection to client established");
 					watch.forEach(this::handle);
+					log.debug("connection to client lost");
 				} catch (Exception e) {
 					if (!closed && !watcher.isInterrupted() && retryCounter < configuration.connectRetries) {
 						try {
