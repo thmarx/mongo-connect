@@ -4,6 +4,8 @@
  */
 package com.github.thmarx.mongo.connect;
 
+import java.util.function.BiConsumer;
+
 /*-
  * #%L
  * mongo-connect
@@ -29,11 +31,5 @@ package com.github.thmarx.mongo.connect;
  * @author t.marx
  */
 @FunctionalInterface
-public interface CollectionFunction {
-
-	void accept(Type type, String database, String colection);
-
-	public enum Type {
-		DROPPED;
-	}
+public interface CollectionFunction extends BiConsumer<String, String> {
 }

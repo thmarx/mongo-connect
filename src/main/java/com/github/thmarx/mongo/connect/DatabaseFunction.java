@@ -20,16 +20,12 @@ package com.github.thmarx.mongo.connect;
  * #L%
  */
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  *
  * @author t.marx
  */
 @FunctionalInterface
-public interface DatabaseFunction extends BiConsumer<DatabaseFunction.Type, String>{
-	
-	public enum Type {
-		DROPPED;
-	}
+public interface DatabaseFunction extends Consumer<String>{
 }

@@ -53,7 +53,7 @@ public class ReconnectTest extends AbstractContainerTest {
 		mongoTriggers = new MongoConnect(new Configuration()
 			.connectRetryDelay(TimeUnit.SECONDS.toMillis(1))
 		);
-		mongoTriggers.open(database);
+		mongoTriggers.open(() -> database.watch());
 	}
 
 	@Test

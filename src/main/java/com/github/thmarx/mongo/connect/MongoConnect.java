@@ -20,10 +20,10 @@ package com.github.thmarx.mongo.connect;
  * #L%
  */
 
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.ChangeStreamIterable;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.function.Supplier;
+import org.bson.Document;
 
 /**
  *
@@ -34,8 +34,8 @@ public class MongoConnect implements AutoCloseable {
 	ChangeStreamWatcher updater;
 	
 	MultiMap<Event, DocumentFunction> documentFunctions;
-	List<DatabaseFunction> databaseFunctions;
-	List<CollectionFunction> collectionFunctions;
+	MultiMap<Event, DatabaseFunction> databaseFunctions;
+	MultiMap<Event, CollectionFunction> collectionFunctions;
 
 	final Configuration configuration;
 
@@ -46,32 +46,34 @@ public class MongoConnect implements AutoCloseable {
 	public MongoConnect(Configuration configuration) {
 		this.configuration = configuration;
 		this.documentFunctions = new MultiMap<>();
-		databaseFunctions = new ArrayList<>();
-		collectionFunctions = new ArrayList<>();
+		databaseFunctions = new MultiMap<>();
+		collectionFunctions = new MultiMap<>();
 	}
 	
-	public void register(final Event event, final DocumentFunction trigger) {
-		documentFunctions.put(event, trigger);
+	public void register(final Event event, final DocumentFunction function) {
+		documentFunctions.put(event, function);
 	}
 	
-	public void register(final CollectionFunction trigger) {
-		collectionFunctions.add(trigger);
+	public void register(final Event event, final CollectionFunction function) {
+		collectionFunctions.put(event, function);
 	}
 	
-	public void register(final DatabaseFunction trigger) {
-		databaseFunctions.add(trigger);
+	public void register(final Event event, final DatabaseFunction function) {
+		databaseFunctions.put(event, function);
 	}
 	
 
 	@Override
 	public void close() throws Exception {
 		updater.close();
+		updater = null;
 	}
 
-	public void open(MongoDatabase database) throws IOException {
-		
-		updater = new ChangeStreamWatcher(database, this.configuration, documentFunctions, databaseFunctions, collectionFunctions);
-		
+	public void open(Supplier<ChangeStreamIterable<Document>> changeStreamSupplier) throws IOException {
+		if (updater != null) {
+			throw new RuntimeException("already open");
+		}
+		updater = new ChangeStreamWatcher(changeStreamSupplier, this.configuration, documentFunctions, databaseFunctions, collectionFunctions);
 		updater.connect();
 	}
 }

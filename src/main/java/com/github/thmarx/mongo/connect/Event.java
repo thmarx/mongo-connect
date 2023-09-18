@@ -25,6 +25,7 @@ package com.github.thmarx.mongo.connect;
  * @author t.marx
  */
 public enum Event {
+	DROP,
 	INSERT,
 	UPDATE,
 	DELETE;

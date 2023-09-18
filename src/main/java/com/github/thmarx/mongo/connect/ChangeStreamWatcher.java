@@ -23,11 +23,12 @@ import org.bson.Document;
  * limitations under the License.
  * #L%
  */
-
 import com.mongodb.client.ChangeStreamIterable;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.FullDocument;
+import java.util.function.Supplier;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,27 +41,27 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ChangeStreamWatcher implements AutoCloseable {
 
-	private final MongoDatabase database;
+	private final Supplier<ChangeStreamIterable<Document>> changeStreamSupplier;
 	private final Configuration configuration;
 
 	private final MultiMap<Event, DocumentFunction> documentFunctions;
-	private final List<DatabaseFunction> databaseFunctions;
-	private final List<CollectionFunction> collectionFunctions;
+	private final MultiMap<Event, DatabaseFunction> databaseFunctions;
+	private final MultiMap<Event, CollectionFunction> collectionFunctions;
 
 	private Thread watcher;
 
 	private boolean closed = false;
 
 	public void connect() {
-		
+
 		watcher = new Thread(() -> {
 			int retryCounter = 0;
 			while (!closed) {
 				try {
-					log.debug("try to connect to " + database.getName() + " changestream");
-					ChangeStreamIterable<Document> watch = database.watch().fullDocument(FullDocument.UPDATE_LOOKUP);
+					log.debug("try to connect to client changestream");
+					ChangeStreamIterable<Document> watch = changeStreamSupplier.get().fullDocument(FullDocument.UPDATE_LOOKUP);
 					retryCounter = 0;
-					log.debug("connection to " + database.getName() + " established");
+					log.debug("connection to client established");
 					watch.forEach(this::handle);
 				} catch (Exception e) {
 					if (!closed && !watcher.isInterrupted() && retryCounter < configuration.connectRetries) {
@@ -84,22 +85,26 @@ public class ChangeStreamWatcher implements AutoCloseable {
 	}
 
 	public void handle(ChangeStreamDocument<Document> document) {
-		if (isCollectionRelevant(document)) {
-			var collection = document.getNamespace().getCollectionName();
-			var databaseName = document.getNamespace().getDatabaseName();
-			switch (document.getOperationType()) {
-				case DELETE -> documentFunctions.get(Event.DELETE)
+		var collection = document.getNamespace().getCollectionName();
+		var databaseName = document.getNamespace().getDatabaseName();
+		switch (document.getOperationType()) {
+			case DELETE ->
+				documentFunctions.get(Event.DELETE)
 						.forEach((function) -> function.accept(databaseName, collection, document));
-				case INSERT -> documentFunctions.get(Event.INSERT)
+			case INSERT ->
+				documentFunctions.get(Event.INSERT)
 						.forEach((function) -> function.accept(databaseName, collection, document));
-				case UPDATE -> documentFunctions.get(Event.UPDATE)
+			case UPDATE ->
+				documentFunctions.get(Event.UPDATE)
 						.forEach((function) -> function.accept(databaseName, collection, document));
-				case DROP -> collectionFunctions
-						.forEach(function -> function.accept(CollectionFunction.Type.DROPPED, databaseName, collection));
-				case DROP_DATABASE ->
-					databaseFunctions.forEach(function -> function.accept(DatabaseFunction.Type.DROPPED, databaseName));
-			}
+			case DROP ->
+				collectionFunctions.get(Event.DROP)
+						.forEach(function -> function.accept(databaseName, collection));
+			case DROP_DATABASE ->
+				databaseFunctions.get(Event.DROP)
+						.forEach(function -> function.accept(databaseName));
 		}
+
 	}
 
 	private boolean isCollectionRelevant(ChangeStreamDocument<Document> document) {
