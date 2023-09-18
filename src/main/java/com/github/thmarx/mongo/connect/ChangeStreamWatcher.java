@@ -6,7 +6,7 @@ import org.bson.Document;
 
 /*-
  * #%L
- * mongo-trigger-index
+ * mongo-connect
  * %%
  * Copyright (C) 2023 Marx-Software
  * %%

@@ -2,7 +2,7 @@ package com.github.thmarx.mongo.connect;
 
 /*-
  * #%L
- * mongo-trigger-core
+ * mongo-connect
  * %%
  * Copyright (C) 2023 Marx-Software
  * %%

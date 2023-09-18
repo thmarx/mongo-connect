@@ -2,7 +2,7 @@ package com.github.thmarx.mongo.connect;
 
 /*-
  * #%L
- * mongo-trigger-core
+ * mongo-connect
  * %%
  * Copyright (C) 2023 Marx-Software
  * %%
@@ -20,9 +20,6 @@ package com.github.thmarx.mongo.connect;
  * #L%
  */
 
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import java.io.IOException;
 import java.util.Map;
@@ -30,9 +27,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.assertj.core.api.Assertions;
 import org.awaitility.Awaitility;
-import org.bson.Document;
-import org.testcontainers.DockerClientFactory;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
