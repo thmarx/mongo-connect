@@ -2,11 +2,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
  */
-package com.github.thmarx.mongo.trigger;
+package com.github.thmarx.mongo.connect;
 
 /*-
  * #%L
- * mongo-trigger-core
+ * mongo-connect
  * %%
  * Copyright (C) 2023 Marx-Software
  * %%
@@ -24,14 +24,16 @@ package com.github.thmarx.mongo.trigger;
  * #L%
  */
 
-import com.mongodb.client.model.changestream.ChangeStreamDocument;
-import org.bson.Document;
-
 /**
  *
  * @author t.marx
  */
 @FunctionalInterface
-public interface DocumentTrigger {
-	void accept (String database, String colection, ChangeStreamDocument<Document> document);
+public interface CollectionFunction {
+
+	void accept(Type type, String database, String colection);
+
+	public enum Type {
+		DROPPED;
+	}
 }

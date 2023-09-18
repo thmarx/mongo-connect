@@ -1,4 +1,4 @@
-package com.github.thmarx.mongo.trigger;
+package com.github.thmarx.mongo.connect;
 
 /*-
  * #%L

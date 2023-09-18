@@ -1,8 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package com.github.thmarx.mongo.trigger;
+package com.github.thmarx.mongo.connect;
 
 /*-
  * #%L
@@ -33,37 +29,37 @@ import java.util.List;
  *
  * @author t.marx
  */
-public class MongoTriggers implements AutoCloseable {
+public class MongoConnect implements AutoCloseable {
 
 	ChangeStreamWatcher updater;
 	
-	MultiMap<Event, DocumentTrigger> documentTrigger;
-	List<DatabaseTrigger> databaseTrigger;
-	List<CollectionTrigger> collectionTrigger;
+	MultiMap<Event, DocumentFunction> documentFunctions;
+	List<DatabaseFunction> databaseFunctions;
+	List<CollectionFunction> collectionFunctions;
 
 	final Configuration configuration;
 
-	public MongoTriggers () {
+	public MongoConnect () {
 		this(new Configuration());
 	}
 
-	public MongoTriggers(Configuration configuration) {
+	public MongoConnect(Configuration configuration) {
 		this.configuration = configuration;
-		this.documentTrigger = new MultiMap<>();
-		databaseTrigger = new ArrayList<>();
-		collectionTrigger = new ArrayList<>();
+		this.documentFunctions = new MultiMap<>();
+		databaseFunctions = new ArrayList<>();
+		collectionFunctions = new ArrayList<>();
 	}
 	
-	public void register(final Event event, final DocumentTrigger trigger) {
-		documentTrigger.put(event, trigger);
+	public void register(final Event event, final DocumentFunction trigger) {
+		documentFunctions.put(event, trigger);
 	}
 	
-	public void register(final CollectionTrigger trigger) {
-		collectionTrigger.add(trigger);
+	public void register(final CollectionFunction trigger) {
+		collectionFunctions.add(trigger);
 	}
 	
-	public void register(final DatabaseTrigger trigger) {
-		databaseTrigger.add(trigger);
+	public void register(final DatabaseFunction trigger) {
+		databaseFunctions.add(trigger);
 	}
 	
 
@@ -74,7 +70,7 @@ public class MongoTriggers implements AutoCloseable {
 
 	public void open(MongoDatabase database) throws IOException {
 		
-		updater = new ChangeStreamWatcher(database, this.configuration, documentTrigger, databaseTrigger, collectionTrigger);
+		updater = new ChangeStreamWatcher(database, this.configuration, documentFunctions, databaseFunctions, collectionFunctions);
 		
 		updater.connect();
 	}

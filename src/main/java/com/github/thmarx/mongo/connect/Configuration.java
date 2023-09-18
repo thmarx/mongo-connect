@@ -1,12 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Enum.java to edit this template
- */
-package com.github.thmarx.mongo.trigger;
+package com.github.thmarx.mongo.connect;
 
 /*-
  * #%L
- * mongo-trigger-core
+ * mongo-connect
  * %%
  * Copyright (C) 2023 Marx-Software
  * %%
@@ -24,12 +20,12 @@ package com.github.thmarx.mongo.trigger;
  * #L%
  */
 
-/**
- *
- * @author t.marx
- */
-public enum Event {
-	INSERT,
-	UPDATE,
-	DELETE;
+import lombok.Data;
+import lombok.experimental.Accessors;
+
+@Data
+@Accessors(fluent = true)
+public class Configuration {
+    public int connectRetries = 10;
+    public long connectRetryDelay = 1000;
 }

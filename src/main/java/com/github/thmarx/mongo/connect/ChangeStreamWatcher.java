@@ -1,8 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package com.github.thmarx.mongo.trigger;
+package com.github.thmarx.mongo.connect;
 
 import java.util.List;
 
@@ -47,9 +43,9 @@ public class ChangeStreamWatcher implements AutoCloseable {
 	private final MongoDatabase database;
 	private final Configuration configuration;
 
-	private final MultiMap<Event, DocumentTrigger> documentTrigger;
-	private final List<DatabaseTrigger> databaseTrigger;
-	private final List<CollectionTrigger> collectionTrigger;
+	private final MultiMap<Event, DocumentFunction> documentFunctions;
+	private final List<DatabaseFunction> databaseFunctions;
+	private final List<CollectionFunction> collectionFunctions;
 
 	private Thread watcher;
 
@@ -92,16 +88,16 @@ public class ChangeStreamWatcher implements AutoCloseable {
 			var collection = document.getNamespace().getCollectionName();
 			var databaseName = document.getNamespace().getDatabaseName();
 			switch (document.getOperationType()) {
-				case DELETE -> documentTrigger.get(Event.DELETE)
+				case DELETE -> documentFunctions.get(Event.DELETE)
 						.forEach((function) -> function.accept(databaseName, collection, document));
-				case INSERT -> documentTrigger.get(Event.INSERT)
+				case INSERT -> documentFunctions.get(Event.INSERT)
 						.forEach((function) -> function.accept(databaseName, collection, document));
-				case UPDATE -> documentTrigger.get(Event.UPDATE)
+				case UPDATE -> documentFunctions.get(Event.UPDATE)
 						.forEach((function) -> function.accept(databaseName, collection, document));
-				case DROP -> collectionTrigger
-						.forEach(trigger -> trigger.accept(CollectionTrigger.Type.DROPPED, databaseName, collection));
+				case DROP -> collectionFunctions
+						.forEach(function -> function.accept(CollectionFunction.Type.DROPPED, databaseName, collection));
 				case DROP_DATABASE ->
-					databaseTrigger.forEach(trigger -> trigger.accept(DatabaseTrigger.Type.DROPPED, databaseName));
+					databaseFunctions.forEach(function -> function.accept(DatabaseFunction.Type.DROPPED, databaseName));
 			}
 		}
 	}
