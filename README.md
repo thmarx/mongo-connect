@@ -1,7 +1,7 @@
 
 # mongo-connect
 
-Mongo-connect
+mongo-connect supports using the MongoDB changestream.
 
 ## Examples
 
@@ -22,24 +22,24 @@ mongoConnect.open(mongoConnect.open(() -> database.getCollection("test-collectio
 
 ### listen for database events
 
-´´´java
+```java
 mongoConnect.register(Event.DROP, (name) -> {
 	System.out.println("database %s dropped".formatted(name));
 });
-´´´
+```
 
 ### listen for collection events
 
-´´´java
+```java
 mongoConnect.register(Event.DROP, (databaseName, collectionName) -> {
 	System.out.println("collection %s of database %s dropped".formatted(databaseName, collectionName));
 });
-´´´
+```
 
 ### listen for document events
 
-´´´java
+```java
 mongoConnect.register(Event.INSERT, (databaseName, collectionName, document) -> {
 	System.out.println("new document inserted into collection %s".format(collectionName));
 });
-´´´
+```
