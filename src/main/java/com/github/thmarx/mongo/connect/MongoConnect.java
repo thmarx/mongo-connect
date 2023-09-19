@@ -65,8 +65,10 @@ public class MongoConnect implements AutoCloseable {
 
 	@Override
 	public void close() throws Exception {
-		updater.close();
-		updater = null;
+		if (updater != null) {
+			updater.close();
+			updater = null;
+		}
 	}
 
 	public void open(Supplier<ChangeStreamIterable<Document>> changeStreamSupplier) throws IOException {
