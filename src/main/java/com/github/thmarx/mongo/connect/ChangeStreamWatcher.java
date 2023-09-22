@@ -32,6 +32,7 @@ import java.util.function.Supplier;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.BsonDocument;
 
 /**
  *
@@ -51,6 +52,7 @@ public class ChangeStreamWatcher implements AutoCloseable {
 	private Thread watcher;
 
 	private boolean closed = false;
+	private BsonDocument resumeToken;
 
 	public void connect() {
 
@@ -61,6 +63,10 @@ public class ChangeStreamWatcher implements AutoCloseable {
 					log.debug("try to connect to client changestream");
 					ChangeStreamIterable<Document> watch = changeStreamSupplier.get().fullDocument(FullDocument.UPDATE_LOOKUP);
 					retryCounter = 0;
+					if (resumeToken != null) {
+						log.debug("connect with resume token");
+						watch.resumeAfter(resumeToken);
+					}
 					log.debug("connection to client established");
 					watch.forEach(this::handle);
 					log.debug("connection to client lost");
@@ -86,6 +92,7 @@ public class ChangeStreamWatcher implements AutoCloseable {
 	}
 
 	public void handle(ChangeStreamDocument<Document> document) {
+		this.resumeToken = document.getResumeToken();
 		var collection = document.getNamespace().getCollectionName();
 		var databaseName = document.getNamespace().getDatabaseName();
 		switch (document.getOperationType()) {
